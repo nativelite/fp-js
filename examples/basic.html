@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>@nativelite/fp demo</title>
+  </head>
+  <body>
+    <h1>@nativelite/fp — demo</h1>
+    <button id="run">Create fingerprint</button>
+    <pre id="out"></pre>
+    <script type="module">
+      import { createFingerprint } from "../dist/index.js";
+      const btn = document.getElementById('run');
+      const out = document.getElementById('out');
+      btn.onclick = async () => {
+        const fp = await createFingerprint({ heavy: true, stableOnly: true });
+        out.textContent = JSON.stringify(fp, null, 2);
+      };
+    </script>
+
+    <!-- CDN/IIFE usage example (no bundler) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@nativelite/fp/dist/iife/index.js"></script> -->
+    <!-- <script>
+      // window.NativeliteFP is available
+      // NativeliteFP.createFingerprint({ heavy: true }).then(fp => console.log(fp));
+    </script> -->
+  </body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "name": "@nativelite/fp",
+  "version": "0.2.0",
+  "description": "Lightweight, dependency‑free browser + server fingerprinting with explainable signals and similarity scoring.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "unpkg": "dist/iife/index.js",
+  "jsdelivr": "dist/iife/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/signals.node.d.ts",
+      "import": "./dist/signals.node.js",
+      "require": "./dist/signals.node.cjs"
+    },
+    "./browser": {
+      "types": "./dist/signals.browser.d.ts",
+      "import": "./dist/signals.browser.js",
+      "require": "./dist/signals.browser.cjs"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts src/signals.browser.ts src/signals.node.ts --dts --format esm,cjs --out-dir dist --minify --clean && tsup src/index.ts --format iife --global-name NativeliteFP --out-dir dist/iife --minify",
+    "dev": "tsup src/index.ts src/signals.browser.ts src/signals.node.ts --watch --format esm,cjs --dts",
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": ["fingerprint", "browser", "node", "device", "similarity", "anti-fraud", "auth", "web"],
+  "author": "nativelite",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.4"
+  }
+}
