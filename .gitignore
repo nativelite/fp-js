@@ -4,3 +4,5 @@ coverage
 dist
 iife
 *.log
+.DS_Store
+.vscode
