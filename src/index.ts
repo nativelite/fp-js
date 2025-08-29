@@ -14,8 +14,7 @@ export const version = VERSION;
 function isBrowser() { return typeof window !== 'undefined' && typeof document !== 'undefined'; }
 
 export async function createFingerprint(opts: BrowserCollectOptions | NodeCollectOptions = {}): Promise<Fingerprint> {
-  const signals = await (isBrowser() ? collectSignalsBrowser(opts as BrowserCollectOptions)
-                                     : collectSignalsNode(opts as NodeCollectOptions));
+  const signals = await (isBrowser() ? collectSignalsBrowser(opts as BrowserCollectOptions) : collectSignalsNode(opts as NodeCollectOptions));
   const payload = toJSONStable(signals);
   const hash = await hashString(payload);
   return { hash, signals, version: VERSION, at: Date.now() };

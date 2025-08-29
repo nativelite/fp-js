@@ -1,10 +1,10 @@
-# @nativelite/fp-js
+# @nativelite/fp
 
 Lightweight, dependency‑free fingerprinting for **browser** and **server**, with explainable signals and similarity scoring.
 
 ## Install
 ```bash
-npm i @nativelite/fp-js
+npm i @nativelite/fp
 ```
 
 ## Use
@@ -26,19 +26,18 @@ const signals = await collectSignalsNode({ headers: req.headers as any, ip: req.
 </script>
 ```
 
-## API
-- `createFingerprint(opts)` → `{ hash, signals, version, at }`
-- `collectSignalsBrowser(opts)` / `collectSignalsNode(opts)`
-- `similarity(a, b)` → `{ score, diffs }`
-
-## Build
+## Measure size
+Quick commands:
 ```bash
-npm run build
+npm run size        # builds then prints raw/gzip/brotli sizes
+npm run size:limit  # builds then enforces budgets (fails if exceeded)
+npm run analyze     # builds then opens a why-report (bundling breakdown)
 ```
+> If a command fails, make sure you’ve run `npm install` and you’re on Node 18+.
 
 ## Repo structure
 ```
-/.github/workflows/ci.yml   # lint, typecheck, build
+/.github/workflows/ci.yml   # lint, typecheck, build, size budget
 /examples/                  # browser + node samples
 /src/                       # core + collectors
   compare.ts

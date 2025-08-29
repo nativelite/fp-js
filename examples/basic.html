@@ -1,28 +1,118 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>@nativelite/fp demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browser Fingerprint Demo — @nativelite/fp</title>
+    <style>
+      :root { --bg:#0b0c10; --card:#121317; --muted:#9aa0aa; --fg:#e6e8ee; --accent:#7aa2f7; --ok:#10b981; }
+      * { box-sizing:border-box }
+      body { margin:0; font:16px/1.5 ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:linear-gradient(180deg,#0a0b0e,#0b0c10 40%); color:var(--fg); }
+      .wrap { max-width:980px; margin:48px auto; padding:0 20px; }
+      .title { font-size: clamp(26px, 4vw, 38px); font-weight:800; letter-spacing:.2px; }
+      .subtitle { color:var(--muted); margin-top:6px }
+      .card { background:radial-gradient(1200px 500px at -10% -10%, #171926, #121317 40%); border:1px solid rgba(255,255,255,0.06); border-radius:18px; box-shadow: 0 20px 60px rgba(0,0,0,.45); padding:22px; }
+      .grid { display:grid; grid-template-columns: 1fr; gap:14px; }
+      @media (min-width:900px){ .grid { grid-template-columns: 2fr 1fr; } }
+      .kvs { display:grid; grid-template-columns: 200px 1fr; gap:10px 16px; align-items:start; }
+      .kvs div { padding:8px 10px; background:#0e1015; border:1px solid rgba(255,255,255,.06); border-radius:10px; }
+      .kvs .k { color:#cbd1db; background:transparent; border:none; padding:8px 0 }
+      code { background:#0e1015; border:1px solid rgba(255,255,255,.06); padding:2px 6px; border-radius:6px }
+      .hash { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break:break-all; background:#0e1015; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:12px }
+      .btnrow { display:flex; gap:10px; flex-wrap:wrap; }
+      button { cursor:pointer; border:none; border-radius:12px; padding:10px 14px; font-weight:700; color:#0b0c10; background:var(--accent); }
+      button.secondary { background:#2dd4bf; }
+      .note { color:var(--muted); font-size:14px }
+      .ok { color:var(--ok) }
+    </style>
   </head>
   <body>
-    <h1>@nativelite/fp — demo</h1>
-    <button id="run">Create fingerprint</button>
-    <pre id="out"></pre>
+    <div class="wrap">
+      <h1 class="title">Browser Fingerprint Demo</h1>
+      <p class="subtitle">Generates a stable hash from device &amp; runtime signals (UA, timezone, canvas, WebGL, screen, etc.). <em>Zero deps, ESM/CJS/IIFE.</em></p>
+
+      <div class="grid" id="app">
+        <div class="card">
+          <h2>Collected Signals</h2>
+          <div class="kvs" id="kvs"></div>
+        </div>
+        <div class="card">
+          <h2>Fingerprint</h2>
+          <p class="note">Deterministic SHA‑256 over normalized fields. <span id="entropy" class="ok"></span></p>
+          <div id="hash" class="hash">Collecting…</div>
+          <div style="height:10px"></div>
+          <div class="btnrow">
+            <button id="copyBtn">Copy Hash</button>
+            <button class="secondary" id="exportBtn">Export JSON</button>
+          </div>
+          <p class="note" style="margin-top:10px">⚠️ Demo only. Obtain consent and follow privacy laws before using fingerprints in production.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option A: local build (after `npm run build`) -->
     <script type="module">
-      import { createFingerprint } from "../dist/index.js";
-      const btn = document.getElementById('run');
-      const out = document.getElementById('out');
-      btn.onclick = async () => {
+      import { createFingerprint } from '../dist/index.js';
+
+      function renderRow(k, v){
+        const kvs = document.getElementById('kvs');
+        const kEl = document.createElement('div'); kEl.className='k'; kEl.textContent = k;
+        const vEl = document.createElement('div'); vEl.textContent = typeof v === 'object' ? JSON.stringify(v) : String(v);
+        kvs.appendChild(kEl); kvs.appendChild(vEl);
+      }
+
+      (async function main(){
         const fp = await createFingerprint({ heavy: true, stableOnly: true });
-        out.textContent = JSON.stringify(fp, null, 2);
-      };
+        const s = fp.signals;
+        const show = {
+          ua: s.ua,
+          uaData: s.uaData,
+          platform: s.platform,
+          languages: s.languages,
+          timezone: s.timezone,
+          timezoneOffset: s.timezoneOffset,
+          screen: s.screen,
+          colorDepth: s.colorDepth,
+          hardwareConcurrency: s.hardwareConcurrency,
+          deviceMemory: s.deviceMemory,
+          maxTouchPoints: s.maxTouchPoints,
+          cookiesEnabled: s.cookiesEnabled,
+          storage: { localStorage: s.localStorage, sessionStorage: s.sessionStorage, indexedDB: s.indexedDB },
+          gpu: s.gpu,
+          fontsSample: s.fontsSample,
+          canvasHash: s.canvasHash
+        };
+        Object.entries(show).forEach(([k,v])=>renderRow(k, v));
+
+        document.getElementById('hash').textContent = fp.hash;
+        const hints = [];
+        if (s.gpu) hints.push('WebGL');
+        if (s.canvasHash) hints.push('Canvas');
+        if (Array.isArray(s.languages) && s.languages.length>1) hints.push('Locale');
+        document.getElementById('entropy').textContent = hints.length?`Signals: ${hints.join(', ')}`:'';
+
+        document.getElementById('copyBtn').onclick = async ()=>{
+          await navigator.clipboard.writeText(fp.hash);
+          const btn = document.getElementById('copyBtn');
+          const old = btn.textContent; btn.textContent='Copied!';
+          setTimeout(()=>btn.textContent=old, 1200);
+        };
+        document.getElementById('exportBtn').onclick = ()=>{
+          const blob = new Blob([JSON.stringify(fp, null, 2)], {type:'application/json'});
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fingerprint.json'; a.click();
+        };
+      })();
     </script>
 
-    <!-- CDN/IIFE usage example (no bundler) -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@nativelite/fp/dist/iife/index.js"></script> -->
-    <!-- <script>
-      // window.NativeliteFP is available
-      // NativeliteFP.createFingerprint({ heavy: true }).then(fp => console.log(fp));
-    </script> -->
+    <!-- Option B: CDN/IIFE -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@nativelite/fp/dist/index.global.js"></script>
+    <script>
+      (async function(){
+        const fp = await NativeliteFP.createFingerprint({ heavy: true, stableOnly: true });
+        // same rendering logic as above
+      })();
+    </script>
+    -->
   </body>
 </html>
