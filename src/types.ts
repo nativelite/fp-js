@@ -15,7 +15,7 @@ export interface BaseCollectOptions {
 export interface BrowserCollectOptions extends BaseCollectOptions {}
 
 export interface NodeCollectOptions extends BaseCollectOptions {
-  headers?: Record<string, string | string | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
   ip?: string | null;
 }
 
