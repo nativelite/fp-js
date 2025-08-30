@@ -1,13 +1,17 @@
 import type { NodeCollectOptions, Signals } from "./types.js";
 import { VERSION } from "./utils.js";
 
-function hget(h: Record<string, any> | undefined, key: string): string | undefined {
-  if (!h) return undefined; const v = h[key] ?? h[key.toLowerCase()];
-  return Array.isArray(v) ? v[0] : (v != null ? String(v) : undefined);
+function hget(
+  h: Record<string, string | string[] | undefined> | undefined,
+  key: string
+): string | undefined {
+  if (!h) return undefined;
+  const v = h[key] ?? h[key.toLowerCase()];
+  return Array.isArray(v) ? v[0] : v != null ? String(v) : undefined;
 }
 
 export async function collectSignalsNode(opts: NodeCollectOptions = {}): Promise<Signals> {
-  const headers = (opts.headers || {}) as Record<string, any>;
+  const headers = opts.headers || {};
   const data: Signals = { _version: VERSION };
 
   data.ua = hget(headers, 'user-agent');

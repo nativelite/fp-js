@@ -5,6 +5,13 @@ export async function hashBytes(bytes: Uint8Array): Promise<string> {
     const digest = await crypto.subtle.digest("SHA-256", buf);
     return b64url(digest);
   }
+  if ((globalThis.crypto as any)?.createHash) {
+    const hash = (globalThis.crypto as any).createHash("sha256");
+    hash.update(bytes as any);
+    const digest: Uint8Array = hash.digest();
+    const ab = digest.buffer.slice(digest.byteOffset, digest.byteOffset + digest.byteLength) as ArrayBuffer;
+    return b64url(ab);
+  }
   let h = 0xcbf29ce484222325n; const p = 0x100000001b3n;
   for (const x of bytes) { h ^= BigInt(x); h = (h * p) & 0xffffffffffffffffn; }
   const out = new Uint8Array(32);

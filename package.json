@@ -32,6 +32,7 @@
     "build": "tsup src/index.ts --dts --format esm,cjs,iife --global-name NativeliteFP --out-dir dist --minify --sourcemap --metafile --clean",
     "dev": "tsup src/index.ts --watch --format esm,cjs --dts",
     "check": "tsc --noEmit -p tsconfig.json",
+    "test": "npx tsx test/signals.node.test.ts",
     "size": "npm run build && node scripts/size.mjs",
     "size:limit": "npm run build && size-limit",
     "analyze": "npm run build && size-limit --why"
