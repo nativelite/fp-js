@@ -4,13 +4,21 @@ export function b64url(ab: ArrayBuffer): string {
   return btoa(b).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 export function toJSONStable(val: unknown): string {
-  if (val && typeof val === 'object' && !Array.isArray(val)) {
+  if (Array.isArray(val)) {
+    const arr = val as unknown[];
+    const json = arr.map((v) => {
+      const s = toJSONStable(v);
+      return s === undefined ? 'null' : s;
+    });
+    return `[${json.join(',')}]`;
+  }
+  if (val && typeof val === 'object') {
     const obj = val as Record<string, unknown>;
     const sorted: Record<string, unknown> = {};
     for (const k of Object.keys(obj).sort()) sorted[k] = toJSONStable(obj[k]);
     return JSON.stringify(sorted);
   }
-  return JSON.stringify(val);
+  return JSON.stringify(val) as string;
 }
 export function tryGet<T>(fn: () => T): T | undefined { try { return fn(); } catch { return undefined; } }
 export async function tryGetAsync<T>(fn: () => Promise<T> | T): Promise<T | undefined> {
