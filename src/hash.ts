@@ -1,7 +1,8 @@
 import { b64url } from "./utils.js";
 export async function hashBytes(bytes: Uint8Array): Promise<string> {
   if (globalThis.crypto?.subtle) {
-    const digest = await crypto.subtle.digest("SHA-256", bytes.buffer as ArrayBuffer);
+    const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    const digest = await crypto.subtle.digest("SHA-256", buf);
     return b64url(digest);
   }
   if ((globalThis.crypto as any)?.createHash) {
