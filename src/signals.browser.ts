@@ -1,6 +1,6 @@
 import { hashString } from "./hash.js";
 import type { BrowserCollectOptions, Signals } from "./types.js";
-import { VERSION, tryGet } from "./utils.js";
+import { VERSION, tryGet, tryGetAsync } from "./utils.js";
 
 export async function collectSignalsBrowser(opts: BrowserCollectOptions = {}): Promise<Signals> {
   const d = typeof document !== "undefined" ? document : (undefined as any);
@@ -52,13 +52,12 @@ export async function collectSignalsBrowser(opts: BrowserCollectOptions = {}): P
       for (const f of fonts) { ctx.font = `16px ${f}`; const m = ctx.measureText("nativelite-fp"); samples[f] = Math.round((m.width ?? 0) * 1000); }
       return samples;
     });
-    data.canvasHash = tryGet(async () => {
+    data.canvasHash = await tryGetAsync(async () => {
       const c = d.createElement("canvas"); c.width = 240; c.height = 40;
       const ctx = c.getContext("2d"); if (!ctx) return undefined;
       ctx.textBaseline = "top"; ctx.font = "14px 'Arial'"; ctx.fillText("@nativelite/fp", 2, 2);
       return await hashString(c.toDataURL());
     });
-    if (data.canvasHash instanceof Promise) data.canvasHash = await data.canvasHash;
   }
 
   if (stableOnly) {

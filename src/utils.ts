@@ -13,4 +13,11 @@ export function toJSONStable(val: unknown): string {
   return JSON.stringify(val);
 }
 export function tryGet<T>(fn: () => T): T | undefined { try { return fn(); } catch { return undefined; } }
+export async function tryGetAsync<T>(fn: () => Promise<T> | T): Promise<T | undefined> {
+  try {
+    return await fn();
+  } catch {
+    return undefined;
+  }
+}
 export function eq(a: unknown, b: unknown): boolean { return toJSONStable(a) === toJSONStable(b); }
