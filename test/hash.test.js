@@ -1,14 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hashString } from '../dist/hash.js';
+import { hashString } from '../src/hash.ts';
 
 test('subtle and node crypto produce same hash', async () => {
   const input = 'hello world';
-  const originalCrypto = globalThis.crypto;
   const subtleHash = await hashString(input);
-  const { createHash } = await import('node:crypto');
-  Object.defineProperty(globalThis, 'crypto', { value: { createHash }, configurable: true });
-  const nodeHash = await hashString(input);
-  Object.defineProperty(globalThis, 'crypto', { value: originalCrypto, configurable: true });
-  assert.equal(nodeHash, subtleHash);
+  const originalCrypto = globalThis.crypto;
+  try {
+    Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true });
+    const nodeHash = await hashString(input);
+    assert.equal(nodeHash, subtleHash);
+  } finally {
+    Object.defineProperty(globalThis, 'crypto', { value: originalCrypto, configurable: true });
+  }
 });
